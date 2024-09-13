@@ -21,7 +21,7 @@ jobs:
             - name: Apply patches
               run: cat $(ls patches/*.patch | sort) | patch -p1 -N
             - name: Build sdist
-              run: pipx run poetry build -f sdist
+              run: pip3 install build && python3 -m build -s .
 
             - uses: actions/upload-artifact@v4
               with:
@@ -49,7 +49,7 @@ jobs:
               run: tar --strip-components=1 -xf dist/*.tar.gz
 
             - name: Build wheel
-              uses: joerick/cibuildwheel@v1.11.0
+              uses: joerick/cibuildwheel@v2.20.0
               env:
                   CIBW_SKIP: cp2* cp35* pp*
                   CIBW_TEST_COMMAND: pytest --regression {package}/tests
