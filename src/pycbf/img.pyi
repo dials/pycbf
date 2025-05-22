@@ -1,5 +1,5 @@
 import os
-from typing import IO, Any, Dict, Union, type_check_only
+from typing import IO, Dict, Union, type_check_only
 
 import numpy as np
 from numpy.typing import NDArray
