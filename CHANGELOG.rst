@@ -1,3 +1,18 @@
+Pycbf 0.9.6.6 (2025-02-19)
+==========================
+
+Features
+--------
+
+- Switched to setuptools extension building. The old poetry way had stopped working, and was never really supported. (#23)
+
+
+Misc
+----
+
+- #26
+
+
 Pycbf 0.9.6.5 (2022-03-23)
 ==========================
 
