@@ -11,7 +11,7 @@ authors = [
     { name = "Paul J. Ellis" },
 ]
 maintainers = [{ name = "Nicholas Devenish", email = "ndevenish@gmail.com" }]
-license = { text = "LGPL-2.1-or-later" }
+license = "LGPL-2.1-or-later"
 readme = "README.md"
 classifiers = [
     "Development Status :: 4 - Beta",
