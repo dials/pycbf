@@ -20,7 +20,7 @@ dependencies = ["numpy>=1.21"]
 Homepate = "http://www.bernstein-plus-sons.com/software/CBF/"
 Repository = "https://github.com/dials/pycbf"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "Cython~=3.1.1",
     "toml~=0.10.2",
