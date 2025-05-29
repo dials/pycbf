@@ -48,9 +48,9 @@ jobs:
               if: "! startsWith(matrix.os, 'windows-')"
               run: tar --strip-components=1 -xf dist/*.tar.gz
             - name: Build wheel
-              uses: pypa/cibuildwheel@v2.22.0
+              uses: pypa/cibuildwheel@v2.23.3
               env:
-                  CIBW_SKIP: cp36* cp37* pp* cp313* *musllinux*
+                  CIBW_SKIP: pp* *musllinux*
                   CIBW_TEST_COMMAND: pytest --regression {package}/tests
                   CIBW_BEFORE_TEST: pip install pytest dials-data
 
