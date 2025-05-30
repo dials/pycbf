@@ -48,6 +48,12 @@ CBF_SOURCES = [
 PYCBF_ROOT = Path(__file__).parent
 CBFLIB_INCLUDE = PYCBF_ROOT / "cbflib" / "include"
 
+# Check we have checked out recursive
+if not any(PYCBF_ROOT.joinpath(x).is_file() for x in CBF_SOURCES):
+    raise RuntimeError(
+        "Error: No CBF sources found. Did you check out --recursive? Run 'git submodule update --init'"
+    )
+
 extensions = [
     Extension(
         "pycbf._pycbf",
