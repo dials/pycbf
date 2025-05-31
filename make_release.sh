@@ -21,7 +21,7 @@ print_help() {
     echo "--no-tag        Don't create a tag for the release commit"
     echo "--no-edit       Don't pause to allow CHANGELOG editing"
     echo "--do            Actually run. Safety so that no arguments doesnt commit"
-#    echo "--dry-run, -n   Don't do anything"
+    #    echo "--dry-run, -n   Don't do anything"
     echo
     echo "ARG....      Arguments to pass to bump2version"
 }
@@ -54,35 +54,35 @@ _positionals=()
 while [[ $# -gt 0 ]]; do
     _key="$1"
     case "$_key" in
-        -h|--help)
-            print_help
-            exit 0
-            ;;
-        -h*)
-            print_help
-            exit 0
-            ;;
-        -n|--dry-run)
-            DRY_RUN=true
-            ;;
-        --allow-nonmain)
-            ALLOW_NONMAIN=true
-            ;;
-        --allow-dirty)
-            ALLOW_DIRTY=true
-            ;;
-        --no-tag)
-            NO_TAG=true
-            ;;
-        --no-edit)
-            NO_EDIT=true
-            ;;
-        --do)
-            DO=true
-            ;;
-        *)
-            _positionals+=("$1")
-            ;;
+    -h | --help)
+        print_help
+        exit 0
+        ;;
+    -h*)
+        print_help
+        exit 0
+        ;;
+    -n | --dry-run)
+        DRY_RUN=true
+        ;;
+    --allow-nonmain)
+        ALLOW_NONMAIN=true
+        ;;
+    --allow-dirty)
+        ALLOW_DIRTY=true
+        ;;
+    --no-tag)
+        NO_TAG=true
+        ;;
+    --no-edit)
+        NO_EDIT=true
+        ;;
+    --do)
+        DO=true
+        ;;
+    *)
+        _positionals+=("$1")
+        ;;
     esac
     shift
 done
@@ -123,40 +123,31 @@ fi
 _start_commit="$(git rev-parse HEAD)"
 
 echo "Starting release process"
-bump2version_args=(release --list)
+bump2version_args=(bump release)
 if [[ $ALLOW_DIRTY == true ]]; then
     bump2version_args+=(--allow-dirty)
 fi
-if ! _output="$(set -x; bump2version "${bump2version_args[@]}")"; then
-    echo "${R}Error: Bump2version failed"
+if ! _output="$(
+    set -x
+    uvx bump-my-version "${bump2version_args[@]}"
+)"; then
+    echo "${R}Error: Bumpbump-my-version2version failed"
     echo "$_output" $NC
     exit 1
 fi
 
-new_version="$(echo "$_output" | grep new_version | sed -r s,"^.*=",,)"
+read_version() {
+    uv run --no-project --with=toml python3 -c "import toml, pathlib; print(toml.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])"
+}
+
+new_version="$(read_version)"
 echo "New version: $BOLD$M$new_version$NC"
 
 echo "Regenerating SWIG files$W"
 silently ./regenerate_pycbf.py
 
-# On M1 mac, there are no wheels for numpy, and it doesn't build.
-# Numpy is only a runtime requirement so this is safe
-echo "Removing numpy from dependencies"
-silently cp pyproject.toml pyproject.toml.bak
-silently sed -i'' -e 's/numpy = ">=1.17"/# numpy = ">=1.17"/' pyproject.toml
-
-echo "Installing base environment"
-silently poetry install
-
-# Restore back for the build
-echo "Restoring original pyproject"
-silently mv pyproject.toml.bak pyproject.toml
-
-echo "Re-running build for Cython"
-silently poetry build
-
 echo "Running towncrier"
-silently towncrier --yes --version="$new_version"
+silently uvx towncrier build --yes --version="$new_version"
 
 if [[ $NO_EDIT != true ]]; then
     echo "Pausing for CHANGELOG editing"
@@ -167,7 +158,6 @@ fi
 
 echo "Running pre-commit to clean up"
 quietly pre-commit run --all || true
-
 
 echo "${BOLD}Making commit$NC"
 quietly git add --update
@@ -181,23 +171,24 @@ fi
 echo "$NC"
 echo "Advancing to new development release"
 
-if ! _output="$(set -x; bump2version minor --list)"; then
+if ! _output="$(
+    set -x
+    uvx bump-my-version bump minor
+)"; then
     echo "${R}Error: Advancing release tag to next development release"
     echo "$_output" $NC
     exit 1
 fi
 
-new_dev_version="$(echo "$_output" | grep new_version | sed -r s,"^.*=",,)"
+new_dev_version="$(read_version)"
 echo "New development version: $BOLD$M$new_dev_version$NC"
 
 echo "Regenerating SWIG files$W"
 silently ./regenerate_pycbf.py
 
-echo "Re-running build for Cython"
-silently poetry build
-
 echo "${BOLD}Making new development commit$NC"
-(   set -x
+(
+    set -x
     git add --update
     git commit -n -m "Advance to ${new_dev_version} development series"
 )
@@ -205,5 +196,5 @@ echo
 echo "Successfully released $M$new_version$NC and advanced to $M$new_dev_version$NC"
 echo
 if [[ $NO_TAG != true ]]; then
-    echo "Please remember to ${B}git push origin main v$new_version$NC"
+    echo "Please remember to ${B}git push origin --atomic main v$new_version$NC"
 fi
