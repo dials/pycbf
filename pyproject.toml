@@ -25,11 +25,12 @@ Repository = "https://github.com/dials/pycbf"
 
 [dependency-groups]
 dev = [
-    "Cython~=3.1.1",
-    "toml~=0.10.2",
-    "pytest",
-    "dials-data",
     "bump-my-version",
+    "Cython~=3.1.1",
+    "dials-data",
+    "pytest",
+    "toml~=0.10.2",
+    "towncrier",
 ]
 
 [tool.ruff]
