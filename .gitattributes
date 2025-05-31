@@ -1,3 +1,4 @@
 data/ filter=lfs diff=lfs merge=lfs -text
 *.cif filter=lfs diff=lfs merge=lfs -text
 *.cbf filter=lfs diff=lfs merge=lfs -text
+uv.lock binary
